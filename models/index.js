@@ -6,6 +6,7 @@ const sequelize = require("./db");
 
 const User           = require("./User");
 const ConfirmToken   = require("./ConfirmToken");
+const PetImage       = require("./PetImage");
 const Pet            = require("./Pet");
 const VetVisit       = require("./VetVisit");
 const Medication     = require("./Medication");
@@ -26,6 +27,9 @@ const Subscription   = require("./subscription");
 // ─── User Associations ────────────────────────────────────────────────────────
 User.hasMany(ConfirmToken, { foreignKey: "userId", onDelete: "CASCADE" });
 ConfirmToken.belongsTo(User, { foreignKey: "userId" });
+
+User.hasMany(PetImage, { foreignKey: "userId", onDelete: "CASCADE" });
+PetImage.belongsTo(User, { foreignKey: "userId" });
 
 User.hasMany(Pet, { foreignKey: "parentId", onDelete: "CASCADE" });
 Pet.belongsTo(User, { foreignKey: "parentId" });
@@ -80,6 +84,7 @@ module.exports = {
   sequelize,
   User,
   ConfirmToken,
+  PetImage,
   Pet,
   VetVisit,
   Medication,

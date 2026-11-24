@@ -18,7 +18,10 @@ const getPetImageUrl = (imageLoc) => {
 	const backendUrl =
 		API_URL || (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "");
 
-	if (normalizedPath.startsWith("/images/") && backendUrl) {
+	if (
+		(normalizedPath.startsWith("/images/") || normalizedPath.startsWith("/api/images/")) &&
+		backendUrl
+	) {
 		return `${backendUrl}${normalizedPath}`;
 	}
 
