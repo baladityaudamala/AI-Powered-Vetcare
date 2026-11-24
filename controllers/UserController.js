@@ -4,7 +4,6 @@ const { User, ConfirmToken } = require("../models/index");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 const { Op } = require("sequelize");
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
@@ -20,27 +19,47 @@ const findUserByEmail = (email) =>
     ),
   });
 
+const sendEmail = async (to, subject, htmlContent) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.BREVO_SENDER_EMAIL;
+
+  if (!apiKey) throw new Error("BREVO_API_KEY is not configured");
+  if (!senderEmail) throw new Error("BREVO_SENDER_EMAIL is not configured");
+
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "api-key": apiKey,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: { email: senderEmail, name: "My Vet" },
+      to: [{ email: to }],
+      subject,
+      htmlContent,
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Brevo email request failed (${response.status}): ${details}`);
+  }
+};
+
 const sendVerificationEmail = async (user, email) => {
   const tokenValue = crypto.randomBytes(16).toString("hex");
   await ConfirmToken.create({ userId: user.id, token: tokenValue });
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.MAIL_USER,
-      pass: (process.env.MAIL_PASS || "").replace(/\s/g, ""),
-    },
-  });
-
   const baseUrl = process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || "http://localhost:5000";
   const url = `${baseUrl}/confirm/verify/${tokenValue}`;
 
-  await transporter.sendMail({
-    from: process.env.MAIL_USER,
-    to: email,
-    subject: "Verify your Account",
-    html: `<h3>Click the link to verify your account: <a href="${url}">Verify Email</a></h3>`,
-  });
+  await sendEmail(
+    email,
+    "Verify your Account",
+    `<h3>Click the link to verify your account: <a href="${url}">Verify Email</a></h3>`
+  );
 };
 
 module.exports = {
@@ -171,23 +190,14 @@ module.exports = {
       const tokenValue = crypto.randomBytes(20).toString("hex");
       await ConfirmToken.create({ userId: user.id, token: tokenValue });
 
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.MAIL_USER,
-          pass: (process.env.MAIL_PASS || "").replace(/\s/g, ""),
-        },
-      });
-
       const baseUrl = process.env.CLIENT_URL || process.env.RENDER_EXTERNAL_URL || "http://localhost:3000";
       const url = `${baseUrl}/reset-password/${tokenValue}`;
 
-      await transporter.sendMail({
-        from: process.env.MAIL_USER,
-        to: email,
-        subject: "Reset Password",
-        html: `<h3>Click the link to reset your password: <a href="${url}">Reset Password</a></h3>`,
-      });
+      await sendEmail(
+        email,
+        "Reset Password",
+        `<h3>Click the link to reset your password: <a href="${url}">Reset Password</a></h3>`
+      );
 
       res.json({ msg: "Password reset link sent to your email." });
     } catch (err) {
