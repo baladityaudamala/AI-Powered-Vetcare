@@ -6,7 +6,6 @@ import PetContext from "../../Context/PetContext";
 import { toast } from "react-toastify";
 
 const AddPet = () => {
-	const { REACT_APP_LOCAL_STORAGE } = process.env;
 	const navigate = useNavigate();
 
 	const [file, setFile] = useState(null);
@@ -136,6 +135,7 @@ const AddPet = () => {
 								>
 									<img
 										ref={uploadedImage}
+										alt="Selected pet"
 										style={{
 											height: "60px",
 											width: "60px",

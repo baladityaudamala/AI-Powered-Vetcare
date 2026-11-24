@@ -3,6 +3,28 @@
 import axios from "axios";
 import { useEffect } from "react";
 
+const API_URL = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
+
+const getPetImageUrl = (imageLoc) => {
+	if (!imageLoc || typeof imageLoc !== "string") {
+		return "/images/paw-print-small.png";
+	}
+
+	const source = imageLoc.trim();
+	if (/^https?:\/\//i.test(source)) return source;
+
+	const imagePath = source.replace(/^(?:\.\/)+/, "/");
+	const normalizedPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+	const backendUrl =
+		API_URL || (process.env.NODE_ENV === "development" ? "http://localhost:5000" : "");
+
+	if (normalizedPath.startsWith("/images/") && backendUrl) {
+		return `${backendUrl}${normalizedPath}`;
+	}
+
+	return normalizedPath;
+};
+
 async function getPetData(petid) {
 	console.log(petid);
 	try {
@@ -29,4 +51,4 @@ const loadUserPets = async (user) => {
 
 const useEffectOnlyOnce = (func) => useEffect(func, [func]);
 
-export { getPetData, loadUserPets, useEffectOnlyOnce };
+export { getPetData, getPetImageUrl, loadUserPets, useEffectOnlyOnce };

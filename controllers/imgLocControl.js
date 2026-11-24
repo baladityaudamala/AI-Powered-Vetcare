@@ -6,12 +6,19 @@ module.exports = {
 	saveLocImage: async (req, res, next) => {
 		try {
 			if (!req.file) {
-				res.status(500);
-				return next(err);
+				return res.status(400).json({ msg: "No image file was uploaded" });
 			}
-			res.send({ fileUrl: "/images/" + req.file.filename });
+
+			const baseUrl = process.env.RENDER_EXTERNAL_URL || process.env.SERVER_URL || "";
+			const imagePath = `/images/${req.file.filename}`;
+			const fileUrl = baseUrl
+				? `${baseUrl.replace(/\/+$/, "")}${imagePath}`
+				: imagePath;
+
+			return res.json({ fileUrl });
 		} catch (err) {
-			(err) => res.send({ msg: err });
+			console.error("Image upload response error:", err);
+			return res.status(500).json({ msg: "Failed to save image" });
 		}
 	},
 	getLocImages: async (req, res) => {

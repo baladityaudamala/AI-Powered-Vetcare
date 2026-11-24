@@ -6,7 +6,6 @@ import Moment from "moment";
 import { toast } from "react-toastify";
 
 const ChangePet = (props) => {
-	const { REACT_APP_LOCAL_STORAGE } = process.env;
 	const uploadedImage = useRef(null);
 	const imageUploader = useRef(null);
 	const [file, setFile] = useState(null);
@@ -31,24 +30,13 @@ const ChangePet = (props) => {
 	const updatePet = async (e) => {
 		e.preventDefault();
 		try {
-			var formData = new FormData();
-
-			formData.append("file", file);
-
-			if (REACT_APP_LOCAL_STORAGE && file) {
-				await axios
-					.post("/api/saveLocImage", formData, {
-						headers: { "x-auth-token": localStorage.getItem("auth-token") },
-					})
-					.then((data) => (newPet.PetImageLoc = data.data.fileUrl));
-			}
-
-			if (!REACT_APP_LOCAL_STORAGE && file) {
-				await axios
-					.post("/api/saveImage", formData, {
-						headers: { "x-auth-token": localStorage.getItem("auth-token") },
-					})
-					.then((data) => (newPet.PetImageLoc = data.data.fileUrl));
+			if (file) {
+				const formData = new FormData();
+				formData.append("file", file);
+				const { data } = await axios.post("/api/saveLocImage", formData, {
+					headers: { "x-auth-token": localStorage.getItem("auth-token") },
+				});
+				newPet.PetImageLoc = data.fileUrl;
 			}
 
 			await axios.patch("/api/updatepet/" + newPet._id, newPet, {

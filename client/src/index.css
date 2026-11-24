@@ -1637,3 +1637,202 @@ footer {
 .add-pet-card:hover .add-pet-icon {
   color: var(--accent-color);
 }
+
+@media (max-width: 992px) {
+  .hero-section {
+    flex-direction: column;
+    min-height: auto;
+    gap: 1.5rem;
+    padding: 2rem 1.25rem 4rem;
+    text-align: center;
+  }
+
+  .landing-content-left {
+    flex: none;
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .landing-content-right {
+    flex: none;
+    width: 100%;
+    max-width: 34rem;
+    height: clamp(18rem, 62vw, 27rem);
+    margin: 0 auto;
+  }
+
+  .yellow-circle {
+    width: min(72vw, 300px);
+    height: min(72vw, 300px);
+  }
+
+  .hero-ring {
+    width: min(88vw, 360px);
+    height: min(88vw, 360px);
+  }
+
+  .landing-title {
+    font-size: clamp(3rem, 8vw, 3.5rem);
+  }
+
+  .landing-description {
+    margin: 0 auto 2rem;
+  }
+
+  .grooming-card {
+    right: 0;
+  }
+
+  .clinic-card {
+    left: 0;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .hero-section {
+    gap: 0.75rem;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .landing-title {
+    font-size: clamp(2.6rem, 12vw, 3.2rem);
+    margin-bottom: 1.25rem;
+  }
+
+  .landing-description {
+    font-size: 1rem;
+    line-height: 1.55;
+    margin-bottom: 1.5rem;
+  }
+
+  .landing-content-right {
+    height: clamp(15rem, 78vw, 20rem);
+  }
+
+  .yellow-circle {
+    width: min(66vw, 260px);
+    height: min(66vw, 260px);
+  }
+
+  .hero-ring {
+    width: min(84vw, 320px);
+    height: min(84vw, 320px);
+  }
+
+  .floating-card {
+    display: none;
+  }
+
+  .features-section,
+  .how-it-works-section {
+    padding: 3rem 1rem;
+  }
+
+  .section-title {
+    font-size: 2.4rem;
+    margin-bottom: 2rem;
+  }
+
+  .stats-section {
+    gap: 1rem;
+    padding: 3rem 1rem;
+  }
+
+  .stat-item {
+    flex: 1 1 130px;
+  }
+
+  .stat-item h2 {
+    font-size: 2.6rem;
+  }
+
+  .landing-footer {
+    margin-top: 0;
+    padding: 3rem 1rem 1.5rem;
+  }
+
+  .newsletter-box {
+    flex-wrap: wrap;
+  }
+
+  .pet-profile-column,
+  .pet-dashboard-cards {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .pet-profile-card .card-title {
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .pet-profile-image {
+    width: 100%;
+    max-height: 260px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .pets-container {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .myPet-header {
+    font-size: clamp(2.4rem, 11vw, 3.5rem);
+    overflow-wrap: anywhere;
+    margin-top: 0;
+  }
+
+  .pet-card {
+    min-height: 200px;
+    padding: 1rem;
+  }
+
+  .pet-card-img {
+    width: 112px;
+    height: 112px;
+    margin-bottom: 0.75rem;
+  }
+
+  .pet-card-title {
+    font-size: 1.65rem;
+  }
+
+  .card-delete-btn {
+    opacity: 1;
+    width: 40px;
+    height: 40px;
+  }
+
+  .add-pet-card {
+    min-height: 200px;
+  }
+
+  .modal-dialog {
+    width: calc(100% - 1rem);
+    max-width: none;
+    margin: 0.5rem auto;
+  }
+
+  .modal-content {
+    max-height: calc(100vh - 1rem);
+    overflow-y: auto;
+  }
+
+  .modal-body {
+    display: block !important;
+    overflow-y: auto;
+  }
+
+  .modal-body input {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .modal-footer > button {
+    width: 100%;
+  }
+}

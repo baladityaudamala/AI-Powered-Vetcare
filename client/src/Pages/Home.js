@@ -4,7 +4,7 @@ import AddPet from "../Components/Modals/AddPet";
 import UserContext from "../Context/UserContext";
 import PetContext from "../Context/PetContext";
 import ConfirmDelete from "../Components/Modals/ConfirmDelete";
-import { loadUserPets } from "../Components/Helpers/PetFunctions";
+import { getPetImageUrl, loadUserPets } from "../Components/Helpers/PetFunctions";
 
 const Home = () => {
 	const { userData } = useContext(UserContext);
@@ -71,19 +71,15 @@ const Home = () => {
 										<i className="fa fa-minus-circle"></i>
 									</button>
 
-									{pet.PetImageLoc ? (
-										<img
-											className="pet-card-img"
-											src={pet.PetImageLoc}
-											alt={pet.PetName}
-										/>
-									) : (
-										<img
-											className="pet-card-img"
-											src="./images/paw-print-small.png"
-											alt="pet"
-										/>
-									)}
+									<img
+										className="pet-card-img"
+										src={getPetImageUrl(pet.PetImageLoc)}
+										alt={pet.PetName || "Pet"}
+										onError={(event) => {
+											event.currentTarget.onerror = null;
+											event.currentTarget.src = "/images/paw-print-small.png";
+										}}
+									/>
 									<h3 className="pet-card-title">{pet.PetName}</h3>
 								</div>
 							</div>

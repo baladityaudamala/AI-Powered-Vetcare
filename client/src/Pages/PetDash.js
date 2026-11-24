@@ -10,7 +10,7 @@ import Vaccinations from "../Components/Vaccinations";
 import DashboardAlerts from "../Components/DashboardAlerts";
 import Moment from "react-moment";
 import ChangePet from "../Components/Modals/ChangePet";
-import { getPetData } from "../Components/Helpers/PetFunctions";
+import { getPetData, getPetImageUrl } from "../Components/Helpers/PetFunctions";
 import ActivityTracker from "../Components/ActivityTracker";
 
 const PetDash = () => {
@@ -79,17 +79,17 @@ const PetDash = () => {
 			<div className="container">
 				<div className="row">
 					{data && (
-						<div className="col-sm-3 py-5">
-							<div className="card m-2 shadow rounded">
-								{data.PetImageLoc ? (
-									<img
-										src={data.PetImageLoc.startsWith('/') || data.PetImageLoc.startsWith('http') ? data.PetImageLoc : `/${data.PetImageLoc}`}
-										className="card-img-top"
-										alt="petImage"
-									></img>
-								) : (
-									<img src="/images/paw-print-small.png" alt="profile"></img>
-								)}
+						<div className="col-sm-3 py-5 pet-profile-column">
+							<div className="card m-2 shadow rounded pet-profile-card">
+								<img
+									src={getPetImageUrl(data.PetImageLoc)}
+									className="card-img-top pet-profile-image"
+									alt={data.PetName || "Pet"}
+									onError={(event) => {
+										event.currentTarget.onerror = null;
+										event.currentTarget.src = "/images/paw-print-small.png";
+									}}
+								/>
 
 								<div className="card-body text-center">
 									<h1 className="card-title">{data.PetName}</h1>
@@ -117,7 +117,7 @@ const PetDash = () => {
 
 					<ChangePet data={data} />
 
-					<div className="pet-dash-cards col-sm-9 py-5">
+					<div className="pet-dash-cards pet-dashboard-cards col-sm-9 py-5">
 						{/* Dashboard Alerts Section */}
 						{data && <DashboardAlerts currentPet={data} />}
 
