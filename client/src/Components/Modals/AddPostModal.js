@@ -68,10 +68,11 @@ const AddPostModal = ({
                         <label className="form-label fw-bold">Photo / Video</label>
                         <input
                             type="file"
-                            accept="image/*, video/*"
+                            accept="image/avif,image/gif,image/jpeg,image/png,image/webp,video/mp4,video/ogg,video/webm"
                             className="form-control"
-                            onChange={(e) => setFile(e.target.files[0])}
+                            onChange={(e) => setFile(e.target.files[0] || null)}
                         />
+                        <div className="form-text">Images and MP4, OGG, or WebM videos up to 8 MB.</div>
                     </div>
 
                     <div className="mb-3">

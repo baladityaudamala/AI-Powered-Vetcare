@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import Moment from "react-moment";
 import { Link } from "react-router-dom";
 import UserContext from "../../Context/UserContext";
+import { getPetImageUrl } from "../Helpers/PetFunctions";
 
 const PostCard = ({ post, refreshPosts }) => {
     const { userData } = useContext(UserContext);
@@ -22,6 +23,9 @@ const PostCard = ({ post, refreshPosts }) => {
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [comments, setComments] = useState(post.comments || []);
+    const [mediaFailed, setMediaFailed] = useState(false);
+    const mediaUrl = post.image ? getPetImageUrl(post.image) : "";
+    const isVideo = post.mediaType === "video" || /\.(mp4|webm|ogg|mov)$/i.test(post.image || "");
 
     const handleLike = async () => {
         try {
@@ -135,25 +139,31 @@ const PostCard = ({ post, refreshPosts }) => {
                 </div>
             </div>
 
-            {/* DEBUG: Remove later */}
-            {console.log("Post ID:", post._id, "Image:", post.image, "Type:", post.mediaType)}
-
-            {post.image && (
-                (post.mediaType === "video" || post.image.match(/\.(mp4|webm|ogg|mov)$/i)) ? (
+            {post.image && !mediaFailed && (
+                isVideo ? (
                     <video
-                        src={post.image}
+                        src={mediaUrl}
                         className="card-img-top"
                         controls
-                        style={{ maxHeight: "500px", objectFit: "cover", width: "100%" }}
+                        playsInline
+                        preload="metadata"
+                        onError={() => setMediaFailed(true)}
+                        style={{ maxHeight: "500px", objectFit: "contain", width: "100%", backgroundColor: "#f8f9fa" }}
                     />
                 ) : (
                     <img
-                        src={post.image}
+                        src={mediaUrl}
                         className="card-img-top"
                         alt="Post"
-                        style={{ maxHeight: "500px", objectFit: "cover" }}
+                        onError={() => setMediaFailed(true)}
+                        style={{ maxHeight: "500px", objectFit: "contain", backgroundColor: "#f8f9fa" }}
                     />
                 )
+            )}
+            {post.image && mediaFailed && (
+                <div className="bg-light text-muted text-center py-5" role="status">
+                    This photo or video could not be loaded.
+                </div>
             )}
 
             <div className="card-body">

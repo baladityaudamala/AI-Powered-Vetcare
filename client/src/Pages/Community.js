@@ -86,6 +86,11 @@ const Community = () => {
             return;
         }
 
+        if (file && file.size > 8 * 1024 * 1024) {
+            toast.error("Please choose a photo or video smaller than 8 MB.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("petName", pet.PetName);
         formData.append("ownerName", userData.user.displayName);
@@ -103,7 +108,6 @@ const Community = () => {
             await axios.post("/posts", formData, {
                 headers: {
                     "x-auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "multipart/form-data"
                 }
             });
             toast.success("Post shared with the community!");
@@ -117,7 +121,7 @@ const Community = () => {
             if (filter === "All") loadPosts();
         } catch (err) {
             console.log(err);
-            toast.error("Failed to create post");
+            toast.error(err.response?.data?.msg || "Failed to create post. Please try again.");
         }
     };
 

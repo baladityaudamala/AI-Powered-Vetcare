@@ -7,6 +7,7 @@ import UserContext from "../Context/UserContext";
 import PetContext from "../Context/PetContext";
 import AddPostModal from "../Components/Modals/AddPostModal";
 import ViewPostModal from "../Components/Modals/ViewPostModal";
+import { getPetImageUrl } from "../Components/Helpers/PetFunctions";
 
 const Profile = () => {
     const { id } = useParams();
@@ -93,7 +94,6 @@ const Profile = () => {
             await axios.post("/posts", formData, {
                 headers: {
                     "x-auth-token": localStorage.getItem("auth-token"),
-                    "Content-Type": "multipart/form-data"
                 }
             });
             toast.success("Barked successfully!");
@@ -104,7 +104,7 @@ const Profile = () => {
             loadUserPosts(); // Refresh profile posts
         } catch (err) {
             console.log(err);
-            toast.error("Failed to post");
+            toast.error(err.response?.data?.msg || "Failed to post. Please try again.");
         }
     };
 
@@ -167,14 +167,14 @@ const Profile = () => {
                                             {post.image ? (
                                                 (post.mediaType === "video" || post.image.match(/\.(mp4|webm|ogg|mov)$/i)) ? (
                                                     <video
-                                                        src={post.image}
+                                                        src={getPetImageUrl(post.image)}
                                                         className="w-100 h-100"
                                                         style={{ objectFit: "cover" }}
                                                         muted
                                                     />
                                                 ) : (
                                                     <img
-                                                        src={post.image}
+                                                        src={getPetImageUrl(post.image)}
                                                         alt="Post"
                                                         className="w-100 h-100"
                                                         style={{ objectFit: "cover" }}

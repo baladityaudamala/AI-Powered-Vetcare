@@ -1,5 +1,5 @@
 // controllers/PostController.js — Sequelize version
-const { Post, PostTag, PostLike, PostComment, User } = require("../models/index");
+const { sequelize, Post, PostMedia, PostTag, PostLike, PostComment, User } = require("../models/index");
 
 // Helper: convert a Post Sequelize instance to the JSON shape the frontend expects
 // — likedBy becomes array of userId strings
@@ -34,43 +34,90 @@ const POST_INCLUDE = [
 module.exports = {
   // Create a new post
   createPost: async (req, res) => {
-    console.log("Create Post Request Received");
+    let transaction;
     try {
       const { petName, ownerName, caption, category, tags } = req.body;
-      console.log("Body:", req.body);
-
-      let imagePath = "";
-      let mediaType = "image";
-      if (req.file) {
-        console.log("File detected:", req.file.filename);
-        imagePath = "/images/" + req.file.filename;
-        if (req.file.mimetype.startsWith("video")) mediaType = "video";
-      } else {
-        console.log("No file detected");
+      if (!petName || !ownerName || !caption) {
+        return res.status(400).json({ msg: "Pet, owner, and post content are required." });
       }
 
+      let parsedTags = [];
+      if (tags) {
+        try {
+          parsedTags = JSON.parse(tags);
+        } catch {
+          return res.status(400).json({ msg: "Tags must be valid JSON." });
+        }
+        if (!Array.isArray(parsedTags) || parsedTags.some(tag => typeof tag !== "string")) {
+          return res.status(400).json({ msg: "Tags must be a list of text values." });
+        }
+      }
+
+      transaction = await sequelize.transaction();
       const newPost = await Post.create({
         petName,
         ownerName,
         ownerId: req.user,
-        image: imagePath,
-        mediaType,
+        image: "",
+        mediaType: req.file && req.file.mimetype.startsWith("video") ? "video" : "image",
         caption,
         category,
-      });
+      }, { transaction });
 
-      // Save tags
-      const parsedTags = tags ? JSON.parse(tags) : [];
-      if (parsedTags.length) {
-        await PostTag.bulkCreate(parsedTags.map(tag => ({ postId: newPost.id, tag })));
+      if (req.file) {
+        const media = await PostMedia.create({
+          postId: newPost.id,
+          ownerId: req.user,
+          mimeType: req.file.mimetype,
+          mediaData: req.file.buffer,
+        }, { transaction });
+        const baseUrl = process.env.SERVER_URL || process.env.RENDER_EXTERNAL_URL || "";
+        await newPost.update({
+          image: `${baseUrl.replace(/\/+$/, "")}/posts/media/${media.id}`,
+        }, { transaction });
       }
 
-      const full = await Post.findByPk(newPost.id, { include: POST_INCLUDE });
-      console.log("Post saved successfully");
+      if (parsedTags.length) {
+        await PostTag.bulkCreate(
+          parsedTags.map(tag => ({ postId: newPost.id, tag })),
+          { transaction }
+        );
+      }
+
+      const full = await Post.findByPk(newPost.id, {
+        include: POST_INCLUDE,
+        transaction,
+      });
+      await transaction.commit();
       res.json(serializePost(full));
     } catch (err) {
-      console.log("Create Post Error:", err);
-      res.status(500).json({ msg: err.message });
+      if (transaction && !transaction.finished) {
+        try {
+          await transaction.rollback();
+        } catch (rollbackError) {
+          console.error("Create post rollback error:", rollbackError);
+        }
+      }
+      console.error("Create post error:", err);
+      res.status(500).json({ msg: "Unable to save the post. Please try again." });
+    }
+  },
+
+  // Community media is public, so it can be loaded by standard image/video elements.
+  getPostMedia: async (req, res) => {
+    try {
+      const media = await PostMedia.findByPk(req.params.id, {
+        attributes: ["mimeType", "mediaData"],
+      });
+      if (!media) return res.status(404).json({ msg: "Post media not found." });
+
+      res.set("Content-Type", media.mimeType);
+      res.set("Cache-Control", "public, max-age=86400");
+      res.set("X-Content-Type-Options", "nosniff");
+      return res.send(media.mediaData);
+    } catch (err) {
+      console.error("Post media fetch error:", err);
+      return res.status(500).json({ msg: "Unable to load post media." });
     }
   },
 

@@ -15,6 +15,7 @@ const Reminder       = require("./Reminder");
 const Activity       = require("./Activity");
 const Expense        = require("./Expense");
 const Post           = require("./Post");
+const PostMedia      = require("./PostMedia");
 const PostTag        = require("./PostTag");
 const PostLike       = require("./PostLike");
 const PostComment    = require("./PostComment");
@@ -53,10 +54,12 @@ Expense.belongsTo(Pet,     { foreignKey: "petId" });
 Post.hasMany(PostTag,     { foreignKey: "postId", as: "tags",     onDelete: "CASCADE" });
 Post.hasMany(PostLike,    { foreignKey: "postId", as: "likedBy",  onDelete: "CASCADE" });
 Post.hasMany(PostComment, { foreignKey: "postId", as: "comments", onDelete: "CASCADE" });
+Post.hasOne(PostMedia,    { foreignKey: "postId", as: "media",    onDelete: "CASCADE" });
 
 PostTag.belongsTo(Post,     { foreignKey: "postId" });
 PostLike.belongsTo(Post,    { foreignKey: "postId" });
 PostComment.belongsTo(Post, { foreignKey: "postId" });
+PostMedia.belongsTo(Post,   { foreignKey: "postId" });
 
 // ─── Chat Associations ────────────────────────────────────────────────────────
 // Many-to-Many: Chat ↔ User via ChatParticipant
@@ -93,6 +96,7 @@ module.exports = {
   Activity,
   Expense,
   Post,
+  PostMedia,
   PostTag,
   PostLike,
   PostComment,
