@@ -10,7 +10,7 @@ import PetContext from "../Context/PetContext";
 import UserContext from "../Context/UserContext";
 
 
-const publicVapidKey = "BK9M-mGggQw8bsFVWSAflQRwdefprehKMHHim5nKrxqXhyNNfDxzUFEI9Cxh0U2HdtnJD_yAkenopAJOQmV2v-A";
+const publicVapidKey = process.env.REACT_APP_VAPID_PUBLIC_KEY;
 
 function urlBase64ToUint8Array(base64String) {
 	const padding = "=".repeat((4 - base64String.length % 4) % 4);
@@ -41,9 +41,19 @@ const Reminders = (props) => {
 	const [dismissedAlarms, setDismissedAlarms] = useState(new Set());
 
 	const subscribeUser = async () => {
+		if (!publicVapidKey) {
+			toast.error("Push notifications are not configured.");
+			return;
+		}
+
 		if ('serviceWorker' in navigator) {
 			try {
 				const register = await navigator.serviceWorker.ready;
+				const existingSubscription = await register.pushManager.getSubscription();
+				if (existingSubscription) {
+					await existingSubscription.unsubscribe();
+				}
+
 				const subscription = await register.pushManager.subscribe({
 					userVisibleOnly: true,
 					applicationServerKey: urlBase64ToUint8Array(publicVapidKey)

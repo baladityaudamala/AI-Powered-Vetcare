@@ -1,18 +1,13 @@
 // routes/pushRoutes.js — Sequelize version
 const router = require("express").Router();
 const { Subscription } = require("../models/index");
-const webpush = require("web-push");
-
-const publicVapidKey = "BK9M-mGggQw8bsFVWSAflQRwdefprehKMHHim5nKrxqXhyNNfDxzUFEI9Cxh0U2HdtnJD_yAkenopAJOQmV2v-A";
-const privateVapidKey = "avSGCDZ69h8tEocPawgHdLoBJ6mMBi5Qnj-5iPHaf1o";
-
-webpush.setVapidDetails(
-    "mailto:test@test.com",
-    publicVapidKey,
-    privateVapidKey
-);
+const { isConfigured } = require("../utils/webPush");
 
 router.post("/subscribe", async (req, res) => {
+    if (!isConfigured) {
+        return res.status(503).json({ error: "Push notifications are not configured." });
+    }
+
     const subscription = req.body;
     const userId = req.body.userId;
 

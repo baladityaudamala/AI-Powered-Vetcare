@@ -1,18 +1,11 @@
 // cron/scheduler.js — Sequelize version
 const cron = require("node-cron");
-const webpush = require("web-push");
 const { Pet, Reminder, Subscription } = require("../models/index");
-
-const publicVapidKey = "BK9M-mGggQw8bsFVWSAflQRwdefprehKMHHim5nKrxqXhyNNfDxzUFEI9Cxh0U2HdtnJD_yAkenopAJOQmV2v-A";
-const privateVapidKey = "avSGCDZ69h8tEocPawgHdLoBJ6mMBi5Qnj-5iPHaf1o";
-
-webpush.setVapidDetails(
-    "mailto:example@yourdomain.org",
-    publicVapidKey,
-    privateVapidKey
-);
+const { webpush, isConfigured } = require("../utils/webPush");
 
 const checkReminders = async () => {
+    if (!isConfigured) return;
+
     try {
         const now = new Date();
         const daysMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -71,7 +64,7 @@ const checkReminders = async () => {
                                 keys: { p256dh: sub.p256dh, auth: sub.auth },
                             }, payload);
                         } catch (error) {
-                            if (error.statusCode === 410 || error.statusCode === 404) {
+                            if ([403, 404, 410].includes(error.statusCode)) {
                                 // Subscription expired — remove it
                                 await Subscription.destroy({ where: { id: sub.id } });
                             }
