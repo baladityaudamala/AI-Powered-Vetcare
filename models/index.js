@@ -21,7 +21,7 @@ const Chat           = require("./Chat");
 const ChatParticipant = require("./ChatParticipant");
 const ChatMessage    = require("./ChatMessage");
 const ChatUnreadCount = require("./ChatUnreadCount");
-const Subscription   = require("./Subscription");
+const Subscription   = require("./subscription");
 
 // ─── User Associations ────────────────────────────────────────────────────────
 User.hasMany(ConfirmToken, { foreignKey: "userId", onDelete: "CASCADE" });
